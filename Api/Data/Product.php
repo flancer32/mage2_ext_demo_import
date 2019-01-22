@@ -11,5 +11,16 @@ namespace Flancer32\DemoImport\Api\Data;
  */
 class Product
 {
+    /** @var int */
+    public $attribute_set_id;
+    /** @var string */
+    public $name;
+    /** @var float */
+    public $price;
+    /** @var string */
     public $sku;
+    /** @var string */
+    public $type_id;
+    /** @var \Flancer32\DemoImport\Api\Data\Category[] */
+    public $categories;
 }

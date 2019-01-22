@@ -11,13 +11,13 @@ class Product
 {
     /** @var int */
     private $cacheAttrSetId = null;
-    /** @var \Magento\Framework\App\ObjectManager */
+    /** @var \Magento\Framework\ObjectManagerInterface */
     private $manObj;
     /** @var \Magento\Catalog\Api\AttributeSetRepositoryInterface */
     private $repoAttrSet;
 
     public function __construct(
-        \Magento\Framework\App\ObjectManager $manObj,
+        \Magento\Framework\ObjectManagerInterface $manObj,
         \Magento\Catalog\Api\AttributeSetRepositoryInterface\Proxy $repoAttrSet
     ) {
         $this->manObj = $manObj;

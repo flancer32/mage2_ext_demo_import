@@ -9,7 +9,6 @@ namespace Flancer32\DemoImport\Service\Usual\OneProduct;
 
 class Request
 {
-    public $attribute_set_id;
-    public $sku;
-    public $type_id;
+    /** @var \Flancer32\DemoImport\Api\Data\Product */
+    public $product;
 }

@@ -15,10 +15,11 @@ use Flancer32\DemoImport\Service\Usual\OneProduct\Response as AResponse;
 class OneProductTest
     extends \PHPUnit\Framework\TestCase
 {
-    private const SKU = 'sku';
+    private const CAT_1_NAME = 'category 3';
+    private const CAT_2_NAME = 'category 4';
     private const NAME = 'name';
     private const PRICE = 12.34;
-    private const CAT_1_NAME = 'category 1';
+    private const SKU = 'sku';
 
     public static function setUpBeforeClass()
     {
@@ -41,9 +42,11 @@ class OneProductTest
         $prod->sku = self::SKU;
         $prod->name = self::NAME;
         $prod->price = self::PRICE;
-        $cat = new DCategory();
-        $cat->name = self::CAT_1_NAME;
-        $prod->categories = [$cat];
+        $cat1 = new DCategory();
+        $cat1->name = self::CAT_1_NAME;
+        $cat2 = new DCategory();
+        $cat2->name = self::CAT_2_NAME;
+        $prod->categories = [$cat1, $cat2];
 
         /* use service to create new product entity */
         /** @var \Flancer32\DemoImport\Service\Usual\OneProduct $service */

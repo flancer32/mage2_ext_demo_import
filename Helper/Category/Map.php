@@ -42,7 +42,7 @@ class Map
     {
         $cat = $this->factCat->create();
         $cat->setName($name);
-        $cat->setIsActive(false);
+        $cat->setIsActive(true);
         $saved = $this->repoCat->save($cat);
         $result = $saved->getId();
         return $result;

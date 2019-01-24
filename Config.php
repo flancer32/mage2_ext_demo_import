@@ -8,8 +8,13 @@
 
 namespace Flancer32\DemoImport;
 
-class Config
+interface Config
 {
+    const STORE_ID_ADMIN = 0;
+
+    const ATTR_PROD_DESC = 'description';
+    const ATTR_PROD_DESC_SHORT = 'short_description';
+
     /**
      * This module's name.
      */

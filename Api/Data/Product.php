@@ -13,6 +13,12 @@ class Product
 {
     /** @var int */
     public $attribute_set_id;
+    /** @var \Flancer32\DemoImport\Api\Data\Category[] */
+    public $categories;
+    /** @var string */
+    public $desc;
+    /** @var string */
+    public $desc_short;
     /** @var string */
     public $name;
     /** @var float */
@@ -21,6 +27,4 @@ class Product
     public $sku;
     /** @var string */
     public $type_id;
-    /** @var \Flancer32\DemoImport\Api\Data\Category[] */
-    public $categories;
 }

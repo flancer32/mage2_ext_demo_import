@@ -17,6 +17,8 @@ class OneProductTest
 {
     private const CAT_1_NAME = 'category 3';
     private const CAT_2_NAME = 'category 4';
+    private const DESC = 'full desc';
+    private const DESC_SHORT = 'short desc';
     private const NAME = 'name';
     private const PRICE = 12.34;
     private const SKU = 'sku';
@@ -41,6 +43,8 @@ class OneProductTest
         $prod = new DProduct();
         $prod->sku = self::SKU;
         $prod->name = self::NAME;
+        $prod->desc = self::DESC;
+        $prod->desc_short = self::DESC_SHORT;
         $prod->price = self::PRICE;
         $cat1 = new DCategory();
         $cat1->name = self::CAT_1_NAME;

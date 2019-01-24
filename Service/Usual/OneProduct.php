@@ -6,6 +6,7 @@
 
 namespace Flancer32\DemoImport\Service\Usual;
 
+use Flancer32\DemoImport\Config as Cfg;
 use Flancer32\DemoImport\Service\Usual\OneProduct\Request as ARequest;
 use Flancer32\DemoImport\Service\Usual\OneProduct\Response as AResponse;
 
@@ -19,6 +20,8 @@ class OneProduct
     private $hlpCatMap;
     /** @var \Flancer32\DemoImport\Helper\Product */
     private $hlpProd;
+    /** @var \Magento\Store\Model\StoreManagerInterface */
+    private $manStore;
     /** @var \Magento\Catalog\Api\CategoryLinkRepositoryInterface */
     private $repoCatLink;
     /** @var \Magento\Catalog\Api\ProductRepositoryInterface */
@@ -30,7 +33,8 @@ class OneProduct
         \Magento\Catalog\Api\Data\ProductInterfaceFactory $factProd,
         \Magento\Catalog\Model\CategoryProductLinkFactory $factCatProdLink,
         \Flancer32\DemoImport\Helper\Product $hlpProd,
-        \Flancer32\DemoImport\Helper\Category\Map $hlpCatMap
+        \Flancer32\DemoImport\Helper\Category\Map $hlpCatMap,
+        \Magento\Store\Model\StoreManagerInterface $manStore
     ) {
         $this->repoProd = $repoProd;
         $this->repoCatLink = $repoCatLink;
@@ -38,6 +42,7 @@ class OneProduct
         $this->factCatProdLink = $factCatProdLink;
         $this->hlpProd = $hlpProd;
         $this->hlpCatMap = $hlpCatMap;
+        $this->manStore = $manStore;
     }
 
     public function exec(ARequest $request): AResponse
@@ -50,6 +55,9 @@ class OneProduct
         /* Create/update categories. */
         $this->hlpCatMap->validate($prodData->categories);
 
+        /* import new product into admin store view (TODO: move it to the head import script) */
+        $this->manStore->setCurrentStore(Cfg::STORE_ID_ADMIN);
+
         /* create product entity and fill it with data */
         $prodEntity = $this->factProd->create();
         /* default attrs */
@@ -57,9 +65,12 @@ class OneProduct
         $prodEntity->setAttributeSetId($attrSetId);
         /* permanent attributes */
         $prodEntity->setSku($prodData->sku);
-        /* additional attributes */
+        /* required attributes */
         $prodEntity->setName($prodData->name);
         $prodEntity->setPrice($prodData->price);
+        /* additional attributes */
+        $prodEntity->setData(Cfg::ATTR_PROD_DESC, $prodData->desc);
+        $prodEntity->setData(Cfg::ATTR_PROD_DESC_SHORT, $prodData->desc_short);
         /* save product entity into repo (DB) */
         $this->repoProd->save($prodEntity);
         /* link categories with product */

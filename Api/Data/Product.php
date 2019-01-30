@@ -20,9 +20,13 @@ class Product
     /** @var string */
     public $desc_short;
     /** @var string */
+    public $image_path;
+    /** @var string */
     public $name;
     /** @var float */
     public $price;
+    /** @var float */
+    public $qty;
     /** @var string */
     public $sku;
     /** @var string */

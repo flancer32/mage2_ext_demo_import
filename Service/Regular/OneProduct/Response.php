@@ -4,7 +4,7 @@
  * Since: 2019
  */
 
-namespace Flancer32\DemoImport\Service\Usual\OneProduct;
+namespace Flancer32\DemoImport\Service\Regular\OneProduct;
 
 
 class Response

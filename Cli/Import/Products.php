@@ -6,8 +6,10 @@
 
 namespace Flancer32\DemoImport\Cli\Import;
 
-use Flancer32\DemoImport\Service\Usual\OneProduct\Request as ARequest;
-use Flancer32\DemoImport\Service\Usual\OneProduct\Response as AResponse;
+use Flancer32\DemoImport\Api\Data\Category as DCategory;
+use Flancer32\DemoImport\Api\Data\Product as DProduct;
+use Flancer32\DemoImport\Service\Regular\OneProduct\Request as ARequest;
+use Flancer32\DemoImport\Service\Regular\OneProduct\Response as AResponse;
 
 /**
  * Console command to import products from JSON.
@@ -15,32 +17,25 @@ use Flancer32\DemoImport\Service\Usual\OneProduct\Response as AResponse;
 class Products
     extends \Symfony\Component\Console\Command\Command
 {
-    private const BUNCH_SIZE = 100;
     private const DESC = 'Import products from JSON (products catalog initialization).';
     private const NAME = 'fl32:import:prod';
-    /* CLI option to import all JSON data w/o any limitations. */
-    private const OPT_ALL_DEFAULT = 'no';
-    private const OPT_ALL_NAME = 'all';
-    private const OPT_ALL_SHORTCUT = 'a';
-    /* CLI option to set limitations on data import. */
-    private const OPT_LIMIT_DEFAULT = 100;
-    private const OPT_LIMIT_NAME = 'limit';
-    private const OPT_LIMIT_SHORTCUT = 'l';
-    /* CLI option to set full path to imported JSON data. */
-    private const OPT_PATH_NAME = 'path';
-    private const OPT_PATH_SHORTCUT = 'p';
-
+    /* CLI option to switch import type (regular|direct). */
+    private const OPT_TYPE_DEFAULT = self::TYPE_REGULAR;
+    private const OPT_TYPE_NAME = 'type';
+    private const OPT_TYPE_SHORTCUT = 't';
+    private const TYPE_DIRECT = 'direct';
+    private const TYPE_REGULAR = 'regular';
     /** @var \Magento\Framework\App\State */
     private $appState;
     /** @var \Magento\Framework\ObjectManagerInterface */
     private $manObj;
-    /** @var \Flancer32\DemoImport\Service\Usual\OneProduct */
-    private $servUsualProd;
+    /** @var \Flancer32\DemoImport\Service\Regular\OneProduct */
+    private $servRegularProd;
 
     public function __construct(
         \Magento\Framework\ObjectManagerInterface $manObj,
         \Magento\Framework\App\State $appState,
-        \Flancer32\DemoImport\Service\Usual\OneProduct $servUsualProd
+        \Flancer32\DemoImport\Service\Regular\OneProduct $servRegularProd
     ) {
         parent::__construct(self::NAME);
         /* Symfony related config is called from parent constructor */
@@ -48,28 +43,15 @@ class Products
         /* own properties */
         $this->manObj = $manObj;
         $this->appState = $appState;
-        $this->servUsualProd = $servUsualProd;
+        $this->servRegularProd = $servRegularProd;
 
         /* add command options */
         $this->addOption(
-            self::OPT_ALL_NAME,
-            self::OPT_ALL_SHORTCUT,
+            self::OPT_TYPE_NAME,
+            self::OPT_TYPE_SHORTCUT,
             \Symfony\Component\Console\Input\InputOption::VALUE_OPTIONAL,
-            "Set 'yes' to import all lines, 'limit' option is ignored in this case (default: no).",
-            self::OPT_ALL_DEFAULT
-        );
-        $this->addOption(
-            self::OPT_LIMIT_NAME,
-            self::OPT_LIMIT_SHORTCUT,
-            \Symfony\Component\Console\Input\InputOption::VALUE_OPTIONAL,
-            "Limit number of records for importing (default: 100).",
-            self::OPT_LIMIT_DEFAULT
-        );
-        $this->addOption(
-            self::OPT_PATH_NAME,
-            self::OPT_PATH_SHORTCUT,
-            \Symfony\Component\Console\Input\InputOption::VALUE_REQUIRED,
-            "Full path to JSON file with data to import into Magneto Catalog."
+            "Set type for products import (regular|direct, default: regular).",
+            self::OPT_TYPE_DEFAULT
         );
     }
 
@@ -99,36 +81,23 @@ class Products
         /** define local working data */
         $output->writeln("Command '{$this->getName()}' is started.");
         $dateStarted = date('Y-m-d H:i:s');
-        $all = (string)$input->getOption(self::OPT_ALL_NAME);
-        $limit = (int)$input->getOption(self::OPT_LIMIT_NAME);
-        $path = (string)$input->getOption(self::OPT_PATH_NAME);
-        $msg = 'Arguments: ' . self::OPT_ALL_NAME . "=$all; ";
-        $msg .= self::OPT_LIMIT_NAME . "=$limit; ";
-        $msg .= self::OPT_PATH_NAME . "=$path; ";
+        $type = (string)$input->getOption(self::OPT_TYPE_NAME);
+        $msg = 'Arguments: ' . self::OPT_TYPE_NAME . "=$type; ";
         $output->writeln($msg);
 
         /** perform operation */
         $this->checkAreaCode();
 
-        $this->testUsualProduct();
+        /* read JSON */
+        $products = $this->readJson();
+        $total = count($products);
+        $output->writeln("Total $total records read from input JSON.");
 
-//        /* read JSON */
-//        $json = $this->readJson($path);
-//        $total = count($json);
-//        $output->writeln("Total $total records read from input JSON.");
-//        /* define number of lines to import */
-//        if ($all == self::OPT_ALL_DEFAULT) {
-//            if ($limit <= 0) {
-//                $limit = self::OPT_LIMIT_DEFAULT;
-//            }
-//            $json = array_slice($json, 0, $limit);
-//        }
-//
-//        /* process JSON data */
-//        $bunchSize = self::BUNCH_SIZE;
-//        $total = count($json);
-//        $output->writeln("Importing $total records using $bunchSize rows bunches (see \${MAGE}/var/log/system.log to trace)...");
-
+        if ($type == self::TYPE_DIRECT) {
+            /* TODO: add direct import here */
+        } else {
+            $this->importRegular($products);
+        }
 
         /** compose result */
         $dateCompleted = date('Y-m-d H:i:s');
@@ -137,21 +106,55 @@ class Products
     }
 
     /**
-     * @param string $path full path to JSON file with import data.
-     * @return array parsed data as associative array.
+     * @param DProduct $products
      */
-    private function readJson($path)
+    private function importRegular($products)
     {
-        $content = file_get_contents($path);
-        $result = json_decode($content);
-        return $result;
+        foreach ($products as $product) {
+            $req = new ARequest();
+            $req->product = $product;
+            /** @var AResponse $resp */
+            $resp = $this->servRegularProd->exec($req);
+        }
     }
 
-    private function testUsualProduct()
+    /**
+     * Read JSON with import data.
+     *
+     * @return DProduct[] parsed data
+     */
+    private function readJson()
     {
-        $req = new ARequest();
-        $req->sku = self::A_SKU;
-        /** @var AResponse $resp */
-        $resp = $this->servUsualProd->exec($req);
+        $result = [];
+        $path = __DIR__ . '/../../etc/data/products.json';
+        $content = file_get_contents($path);
+        $all = json_decode($content);
+        /**
+         * Convert JSON item to data object.
+         */
+        /* all images has relative paths in JSON */
+        $imageBasePath = realpath(__DIR__ . '/../../etc/data/img');
+        foreach ($all as $one) {
+            $entry = new DProduct();
+            $entry->sku = $one->sku;
+            $entry->name = $one->name;
+            $entry->desc = $one->desc;
+            $entry->desc_short = $one->desc_short;
+            $entry->price = $one->price;
+            $entry->qty = $one->qty;
+            $imagePath = $imageBasePath . DIRECTORY_SEPARATOR . $one->image_path;
+            $imagePath = realpath($imagePath);
+            $entry->image_path = $imagePath;
+            $entry->categories = [];
+            if (is_array($one->categories)) {
+                foreach ($one->categories as $name) {
+                    $category = new DCategory();
+                    $category->name = $name;
+                    $entry->categories[] = $category;
+                }
+            }
+            $result[] = $entry;
+        }
+        return $result;
     }
 }

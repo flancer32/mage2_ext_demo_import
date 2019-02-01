@@ -15,6 +15,7 @@ interface Config
      */
     const ATTR_GALLERY_FILE = 'file';
     const ATTR_GALLERY_IMAGES = 'images';
+    const ATTR_GALLERY_LABEL = 'label';
     const ATTR_GALLERY_MEDIA_TYPE = 'media_type';
     const ATTR_GALLERY_TYPE_IMAGE = 'image';
 

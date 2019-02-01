@@ -141,7 +141,8 @@ class OneProduct
         /* add image to product's gallery */
         $gallery[Cfg::ATTR_GALLERY_IMAGES][] = [
             Cfg::ATTR_GALLERY_FILE => $imagePathRelative,
-            Cfg::ATTR_GALLERY_MEDIA_TYPE => Cfg::ATTR_GALLERY_TYPE_IMAGE
+            Cfg::ATTR_GALLERY_MEDIA_TYPE => Cfg::ATTR_GALLERY_TYPE_IMAGE,
+            Cfg::ATTR_GALLERY_LABEL => ''
         ];
         $product->setData(Cfg::ATTR_PROD_MEDIA_GALLERY, $gallery);
         /* set usage areas */

@@ -8,8 +8,10 @@ namespace Flancer32\DemoImport\Cli\Import;
 
 use Flancer32\DemoImport\Api\Data\Category as DCategory;
 use Flancer32\DemoImport\Api\Data\Product as DProduct;
-use Flancer32\DemoImport\Service\Regular\OneProduct\Request as ARequest;
-use Flancer32\DemoImport\Service\Regular\OneProduct\Response as AResponse;
+use Flancer32\DemoImport\Service\Direct\OneProduct\Request as ADirRequest;
+use Flancer32\DemoImport\Service\Direct\OneProduct\Response as ADirResponse;
+use Flancer32\DemoImport\Service\Regular\OneProduct\Request as ARegRequest;
+use Flancer32\DemoImport\Service\Regular\OneProduct\Response as ARegResponse;
 
 /**
  * Console command to import products from JSON.
@@ -29,13 +31,16 @@ class Products
     private $appState;
     /** @var \Magento\Framework\ObjectManagerInterface */
     private $manObj;
+    /** @var \Flancer32\DemoImport\Service\Direct\OneProduct */
+    private $servDirectProd;
     /** @var \Flancer32\DemoImport\Service\Regular\OneProduct */
     private $servRegularProd;
 
     public function __construct(
         \Magento\Framework\ObjectManagerInterface $manObj,
         \Magento\Framework\App\State $appState,
-        \Flancer32\DemoImport\Service\Regular\OneProduct $servRegularProd
+        \Flancer32\DemoImport\Service\Regular\OneProduct $servRegularProd,
+        \Flancer32\DemoImport\Service\Direct\OneProduct $servDirectProd
     ) {
         parent::__construct(self::NAME);
         /* Symfony related config is called from parent constructor */
@@ -44,6 +49,7 @@ class Products
         $this->manObj = $manObj;
         $this->appState = $appState;
         $this->servRegularProd = $servRegularProd;
+        $this->servDirectProd = $servDirectProd;
 
         /* add command options */
         $this->addOption(
@@ -94,7 +100,7 @@ class Products
         $output->writeln("Total $total records read from input JSON.");
 
         if ($type == self::TYPE_DIRECT) {
-            /* TODO: add direct import here */
+            $this->importDirect($products);
         } else {
             $this->importRegular($products);
         }
@@ -105,16 +111,28 @@ class Products
         $output->writeln("Command '{$this->getName()}' is executed.");
     }
 
+    private function importDirect($products)
+    {
+        foreach ($products as $product) {
+            $req = new ADirRequest();
+            $req->product = $product;
+            /** @var ADirResponse $resp */
+            $resp = $this->servDirectProd->exec($req);
+        }
+    }
+
     /**
      * @param DProduct $products
      */
     private function importRegular($products)
     {
         foreach ($products as $product) {
-            $req = new ARequest();
+            $req = new ARegRequest();
             $req->product = $product;
-            /** @var AResponse $resp */
+            /** @var ARegResponse $resp */
             $resp = $this->servRegularProd->exec($req);
+            /* TODO: remove loop break */
+            break;
         }
     }
 

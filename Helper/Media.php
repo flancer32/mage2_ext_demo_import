@@ -26,6 +26,12 @@ class Media
         $this->mediaConfig = $mediaConfig;
     }
 
+    /**
+     * Return absolute path to media folder ('./pub/media/').
+     *
+     * @return string
+     * @throws \Exception
+     */
     public function getDirPubMedia()
     {
         if (is_null($this->cacheDirPubMedia)) {
@@ -46,10 +52,16 @@ class Media
         return $this->cacheDirPubMedia;
     }
 
+    /**
+     * Return absolute path to products catalog media folder ('./pub/media/catalog/product/').
+     *
+     * @return string
+     * @throws \Exception
+     */
     public function getDirPubMediaCatalog()
     {
         if (is_null($this->cacheDirPubMediaCatalog)) {
-            $absolute = $this->getDirPubMedia() . DIRECTORY_SEPARATOR . $this->mediaConfig->getBaseTmpMediaPath();
+            $absolute = $this->getDirPubMedia() . DIRECTORY_SEPARATOR . $this->mediaConfig->getBaseMediaPath();
             if (is_dir($absolute)) {
                 $this->cacheDirPubMediaCatalog = $absolute;
             } else {

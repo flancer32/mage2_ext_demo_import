@@ -6,6 +6,8 @@
 
 namespace Flancer32\DemoImport\Helper;
 
+use Flancer32\DemoImport\Config as Cfg;
+
 class Product
 {
     /** @var int */
@@ -57,15 +59,16 @@ class Product
         $result = null;
         $conn = $this->resource->getConnection();
         $query = $conn->select();
-        $entity = [\Magento\Catalog\Model\Product::ENTITY, 'entity'];
-        $table = $this->resource->getTableName($entity);
-        $query->from($table, ['entity_id']);
-        $query->where("sku=:sku");
-        $rs = $conn->query($query, ['sku' => $sku]);
+        $table = $this->resource->getTableName(Cfg::TBL_CATALOG_PRODUCT_ENTITY);
+        $query->from($table, [Cfg::T_CAT_PROD_ENTITY_F_ENTITY_ID]);
+        $bndSku = 'sku';
+        $query->where(Cfg::T_CAT_PROD_ENTITY_F_SKU . "=:$bndSku");
+        $rs = $conn->query($query, [$bndSku => $sku]);
+        /* 'sku' field has no unique key restriction, so get the first entry from result set */
         $all = $rs->fetchAll();
         if (count($all)) {
             $one = reset($all);
-            $result = $one['entity_id'];
+            $result = $one[Cfg::T_CAT_PROD_ENTITY_F_ENTITY_ID];
         }
         return $result;
     }

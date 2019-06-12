@@ -131,8 +131,6 @@ class Products
             $req->product = $product;
             /** @var ARegResponse $resp */
             $resp = $this->servRegularProd->exec($req);
-            /* TODO: remove loop break */
-            break;
         }
     }
 

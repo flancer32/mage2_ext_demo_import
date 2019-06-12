@@ -165,7 +165,7 @@ class OneProduct
     {
         $fullPath = realpath($source);
         $filename = basename($fullPath);
-        $dirMedia = $this->hlpMedia->getDirPubMediaCatalog();
+        $dirMedia = $this->hlpMedia->getDirPubMediaCatalogTmp();
         $prefix = $this->hlpMedia->getPathPrefixForName($filename);
         $dirTarget = $dirMedia . $prefix;
         $this->hlpMedia->makeDir($dirTarget);

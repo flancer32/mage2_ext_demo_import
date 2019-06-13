@@ -36,4 +36,5 @@ Place importing data into `./etc/data/products.json` (image paths are related to
 ... then run command:
 ```bash
 $ ./bin/magento fl32:import:prod -t regular
+$ ./bin/magento fl32:import:prod -t direct
 ```
